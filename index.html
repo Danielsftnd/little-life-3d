@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Little Life 3D</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;font-family:Arial;background:#9bd2e8}
+canvas{display:block}
+#ui{position:fixed;inset:0;pointer-events:none;color:white}
+#status{position:absolute;top:12px;left:12px;background:#172d3ddd;padding:10px;border-radius:12px}
+#controls{position:absolute;bottom:18px;left:20px;display:grid;grid-template-columns:55px 55px 55px;gap:5px;pointer-events:auto}
+button{border:0;border-radius:12px;background:#193a4ddd;color:white;padding:15px;font-size:18px;font-weight:bold;touch-action:none}
+#up{grid-column:2}#left{grid-column:1}#down{grid-column:2}#right{grid-column:3}
+#talk{position:absolute;right:15px;bottom:20px;pointer-events:auto}
+#talk button{background:#f2cf80;color:#263b42}
+#dialog{position:absolute;bottom:90px;right:15px;width:190px;background:#172d3ddd;padding:12px;border-radius:12px;font-size:13px}
+#rotate{display:none;position:fixed;inset:0;background:#142b36;color:white;z-index:5;align-items:center;justify-content:center;text-align:center;padding:25px}
+@media(orientation:portrait){#rotate{display:flex}}
+</style>
+</head>
+<body>
+<div id="rotate">📱<br>Putar HP ke posisi horizontal untuk bermain.</div>
+<div id="ui">
+<div id="status">🏙️ Little Life 3D<br>Hari 1 · 08:00</div>
+<div id="controls">
+<button id="up">▲</button>
+<button id="left">◀</button>
+<button id="down">▼</button>
+<button id="right">▶</button>
+</div>
+<div id="dialog">Selamat datang di kota! Temui Nadia.</div>
+<div id="talk"><button id="interact">💬 Bicara</button></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script>
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x9bd2e8);
+scene.fog=new THREE.Fog(0x9bd2e8,30,100);
+
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,200);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x637d56,2));
+const sun=new THREE.DirectionalLight(0xffffff,2);
+sun.position.set(-10,20,10);
+scene.add(sun);
+
+function material(color){
+return new THREE.MeshStandardMaterial({color});
+}
+function block(x,y,z,w,h,d,color){
+const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material(color));
+m.position.set(x,y,z);
+scene.add(m);
+return m;
+}
+
+const ground=new THREE.Mesh(
+new THREE.PlaneGeometry(120,120),
+material(0x70a96b)
+);
+ground.rotation.x=-Math.PI/2;
+scene.add(ground);
+
+block(0,.05,0,9,.1,100,0x555960);
+block(-5,.08,0,.7,.1,100,0xe4dfc8);
+block(5,.08,0,.7,.1,100,0xe4dfc8);
+
+function house(x,z,color){
+block(x,1.5,z,5,3,5,color);
+const roof=new THREE.Mesh(
+new THREE.ConeGeometry(4,2,4),
+material(0x9b5140)
+);
+roof.position.set(x,4,z);
+roof.rotation.y=Math.PI/4;
+scene.add(roof);
+block(x,.9,z-2.6,1.2,1.8,.2,0x65452f);
+}
+
+house(-12,-8,0xe8c99a);
+house(12,-14,0xd9b5a0);
+house(-12,14,0xd4d8b5);
+house(12,12,0xc7c9e2);
+
+function tree(x,z){
+const trunk=new THREE.Mesh(
+new THREE.CylinderGeometry(.2,.3,1.5,8),
+material(0x80502e)
+);
+trunk.position.set(x,.75,z);
+scene.add(trunk);
+const leaves=new THREE.Mesh(
+new THREE.SphereGeometry(1,10,8),
+material(0x347b48)
+);
+leaves.position.set(x,2,z);
+scene.add(leaves);
+}
+for(let z=-30;z<35;z+=9){
+tree(-8,z);tree(8,z+3);
+}
+
+function person(color){
+const g=new THREE.Group();
+const body=new THREE.Mesh(
+new THREE.CylinderGeometry(.35,.4,1,10),
+material(color)
+);
+body.position.y=1;
+g.add(body);
+const head=new THREE.Mesh(
+new THREE.SphereGeometry(.3,12,10),
+material(0xd5a17d)
+);
+head.position.y=1.75;
+g.add(head);
+scene.add(g);
+return g;
+}
+
+const player=person(0x3979ce);
+player.position.set(0,0,5);
+
+const nadia=person(0xe68b42);
+nadia.position.set(2,0,-7);
+
+let held={};
+function bind(id,key){
+const b=document.getElementById(id);
+b.addEventListener('pointerdown',e=>{
+e.preventDefault();held[key]=true;
+b.setPointerCapture(e.pointerId);
+});
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>
+b.addEventListener(ev,()=>held[key]=false));
+}
+bind('up','up');
+bind('down','down');
+bind('left','left');
+bind('right','right');
+
+document.getElementById('interact').onclick=()=>{
+const distance=player.position.distanceTo(nadia.position);
+document.getElementById('dialog').textContent=
+distance<3.5
+?'Nadia: Halo! Namaku Nadia. Selamat datang di kota ini!'
+:'Dekati Nadia yang memakai baju oranye untuk berbicara.';
+};
+
+function animate(){
+requestAnimationFrame(animate);
+const speed=.12;
+if(held.up)player.position.z-=speed;
+if(held.down)player.position.z+=speed;
+if(held.left)player.position.x-=speed;
+if(held.right)player.position.x+=speed;
+
+player.position.x=THREE.MathUtils.clamp(player.position.x,-20,20);
+player.position.z=THREE.MathUtils.clamp(player.position.z,-40,40);
+
+camera.position.lerp(
+new THREE.Vector3(player.position.x,8,player.position.z+12),.1
+);
+camera.lookAt(player.position.x,1,player.position.z);
+renderer.render(scene,camera);
+}
+animate();
+
+addEventListener('resize',()=>{
+camera.aspect=innerWidth/innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+  </html>
+  
