@@ -1,147 +1,87 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Little Life 3D — Massive City Update</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jejak Keluarga</title>
 <style>
-:root{--glass:rgba(12,22,31,.82);--line:rgba(255,255,255,.16);--gold:#e7bd78}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#1b2931;color:#fff;font-family:system-ui,Arial;touch-action:none}
-#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
-#hud{position:fixed;inset:0;pointer-events:none}
-.panel{background:var(--glass);border:1px solid var(--line);border-radius:13px;box-shadow:0 8px 24px #0005;backdrop-filter:blur(9px)}
-#logo{position:absolute;top:10px;left:10px;padding:9px 12px;font-size:10px;letter-spacing:1px}
-#logo b{display:block;font-size:15px;letter-spacing:1.5px}
-#stats{position:absolute;right:10px;top:10px;padding:8px 11px;text-align:right;font-size:11px;line-height:1.55}
-#stats b{font-size:15px;color:var(--gold)}
-#mission{position:absolute;left:10px;top:75px;padding:9px 11px;max-width:210px;font-size:11px;line-height:1.4}
-#mission strong{color:var(--gold);letter-spacing:.7px}
-#location{position:absolute;left:10px;top:143px;padding:6px 9px;font-size:10px;color:#dce7e9}
-#joystick{position:absolute;left:22px;bottom:20px;width:122px;height:122px;border-radius:50%;background:#0c172b88;border:2px solid #ffffff55;pointer-events:auto;touch-action:none;box-shadow:0 5px 20px #0005}
-#stick{position:absolute;left:35px;top:35px;width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#e6c18a,#9d7044);border:2px solid #fff9;box-shadow:0 4px 12px #0008;pointer-events:none}
-#actions{position:absolute;right:12px;bottom:17px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:auto}
-.action{min-width:94px;padding:11px 13px;border-radius:12px;border:1px solid #ffffff35;background:#172c39eF;color:white;font-weight:700;font-size:12px;box-shadow:0 4px 14px #0005}
-#interact{background:linear-gradient(135deg,#d6aa68,#9c7043);color:#17232b;border:0}
-#message{position:absolute;right:12px;bottom:170px;width:min(250px,58vw);padding:11px 13px;font-size:12px;line-height:1.45;display:none}
-#map{position:absolute;right:12px;top:105px;width:94px;height:94px;border-radius:50%;border:2px solid #ffffff99;background:#17252dcc;overflow:hidden;box-shadow:0 5px 16px #0006}
-#map:before,#map:after{content:"";position:absolute;background:#b7aa87;opacity:.8}
-#map:before{width:100%;height:5px;top:45px;transform:rotate(-20deg)}
-#map:after{height:100%;width:5px;left:45px;transform:rotate(24deg)}
-#mapdot{position:absolute;width:8px;height:8px;background:#ffcf70;border:1px solid white;border-radius:50%;left:43px;top:43px;z-index:2}
-#toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:12px 18px;display:none;font-size:13px;text-align:center}
-#rotate{display:none;position:fixed;inset:0;z-index:10;background:#14232c;align-items:center;justify-content:center;text-align:center;padding:28px}
-@media(orientation:portrait){#rotate{display:flex}}
-@media(orientation:landscape){#joystick{width:112px;height:112px}#stick{left:31px;top:31px}#map{width:82px;height:82px}#mapdot{left:37px;top:37px}#mission{top:72px}}
+:root{--bg:#101827;--panel:#182438;--panel2:#202f46;--line:#344761;--ink:#edf4ff;--muted:#a9b9ce;--gold:#f4c76b;--green:#74d6a0;--red:#f18c8c;--blue:#8fc4ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#203451,#101827 58%);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:22px max(16px,calc((100% - 1180px)/2));border-bottom:1px solid #344761;background:#101a2acc;position:sticky;top:0;z-index:3;backdrop-filter:blur(12px)}
+h1{margin:0;font-size:clamp(24px,4vw,34px);letter-spacing:.3px}header p{margin:5px 0 0;color:var(--muted)}
+main{max-width:1180px;margin:auto;padding:18px 16px 60px}.top{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat,.panel{background:linear-gradient(145deg,#1b2a40,#172338);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 10px 30px #0002}
+.stat small{color:var(--muted);display:block}.stat strong{font-size:21px}.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.panel{margin-bottom:14px}.panel h2{font-size:18px;margin:0 0 12px}.muted{color:var(--muted)}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}
+button,select,input{font:inherit;border-radius:10px;border:1px solid #49617e;background:#263852;color:var(--ink);padding:9px 12px}button{cursor:pointer;transition:.15s}button:hover{filter:brightness(1.18);transform:translateY(-1px)}button.primary{background:#315d85;border-color:#6b9dc9}button.gold{background:#6c5528;border-color:#b8954e}button.good{background:#24543f;border-color:#4d9a75}button.danger{background:#5c3038;border-color:#a65b69}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.person{background:#22334b;border:1px solid #3a526f;border-radius:12px;padding:12px;margin:8px 0}.person.active{border-color:var(--gold);box-shadow:0 0 0 1px #f4c76b44}.person h3{margin:0 0 4px;font-size:16px}.tag{font-size:11px;padding:3px 7px;border-radius:20px;background:#344a66;color:#d7e8ff;margin-right:4px}.bar{height:7px;background:#33465d;border-radius:9px;overflow:hidden;margin:5px 0 9px}.bar i{display:block;height:100%;background:var(--green)}.tree{display:flex;gap:12px;overflow:auto;padding:4px 0 12px}.generation{min-width:185px;max-width:220px;border-left:2px solid #536d89;padding-left:10px}.event{border-left:3px solid var(--gold);padding:8px 10px;margin:8px 0;background:#202f45;border-radius:0 9px 9px 0}.event small{color:var(--muted)}.job{padding:10px;border:1px solid #3b526e;border-radius:10px;margin:7px 0;background:#1c2c42}.job strong{display:block}.job small{color:var(--muted)}.hidden{display:none}.tabs{display:flex;gap:6px;overflow:auto;margin:0 0 12px}.tabs button{white-space:nowrap}.tabs button.selected{background:#49627f;border-color:var(--gold)}.notice{padding:10px;border-radius:10px;background:#263c52;color:#d7eaff;margin:8px 0}.dialog{background:#1c2d43;padding:10px;border-radius:11px;margin:7px 0;border:1px solid #3b536e}.dialog b{color:#f2d28d}.footer{color:var(--muted);font-size:12px;text-align:center;padding:12px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.top{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.stat strong{font-size:18px}}
 </style>
 </head>
 <body>
-<div id="game"></div>
-<div id="rotate"><div><div style="font-size:42px">📱 ↻</div><b>Putar HP ke posisi horizontal</b><p>Little Life 3D dimainkan dalam mode landscape.</p></div></div>
-<div id="hud">
- <div id="logo" class="panel"><b>LITTLE LIFE</b> MASSIVE CITY UPDATE</div>
- <div id="stats" class="panel">HARI 1 · SENIN<br><b id="clock">08:00</b> ☀️<br>💰 Rp <span id="money">1.000</span><br>⚡ <span id="energy">100</span>%</div>
- <div id="mission" class="panel"><strong>MISI AKTIF</strong><br>Jelajahi kota dan temui Nadia di taman.</div>
- <div id="location" class="panel">📍 Pusat Kota</div>
- <div id="map"><div id="mapdot"></div></div>
- <div id="joystick"><div id="stick"></div></div>
- <div id="actions">
-  <button class="action" id="interact">💬 INTERAKSI</button>
-  <button class="action" id="sprint">🏃 LARI: OFF</button>
-  <button class="action" id="jump">⬆ LOMPAT</button>
- </div>
- <div id="message" class="panel"></div>
- <div id="toast" class="panel"></div>
+<header><h1>🌳 Jejak Keluarga</h1><p>Bangun sebuah keluarga, jalani generasi, dan biarkan pilihan mereka membentuk sejarah.</p></header>
+<main>
+<div class="top" id="stats"></div>
+<div class="panel">
+ <div class="row between"><div><h2>Waktu & perjalanan</h2><div class="muted" id="dateLabel"></div></div>
+ <div class="row"><button id="pauseBtn" onclick="togglePause()">Ⅱ Jeda</button><button onclick="setSpeed(1)">1×</button><button onclick="setSpeed(3)">3×</button><button onclick="setSpeed(8)">8×</button><button class="gold" onclick="advance(12)">Lewati 1 tahun</button></div></div>
+ <div class="muted" id="speedLabel">Waktu berjalan otomatis.</div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<div class="layout">
+<section>
+ <div class="panel"><div class="row between"><h2>🌿 Pohon keluarga</h2><button onclick="renderTree()">Perbarui</button></div><div id="tree" class="tree"></div><div class="muted">Pilih anggota keluarga untuk melihat detail dan mengambil keputusan.</div></div>
+ <div class="panel"><h2>👤 Anggota keluarga</h2><div id="members"></div></div>
+ <div class="panel"><h2>🧬 Detail & keputusan</h2><div id="detail">Pilih seseorang dari daftar keluarga.</div></div>
+</section>
+<aside>
+ <div class="panel"><h2>💼 Dunia pekerjaan</h2><div class="muted">Pekerjaan, kemampuan, dan usaha menentukan karier. Promosi tidak datang otomatis.</div><div id="jobs"></div></div>
+ <div class="panel"><h2>💬 Kehidupan & percakapan</h2><div id="dialogs"></div></div>
+ <div class="panel"><h2>📜 Riwayat keluarga</h2><div id="log"></div></div>
+ <div class="panel"><h2>⚙️ Pengelolaan</h2><div class="row"><button onclick="saveGame()">Simpan</button><button onclick="loadGame()">Muat</button><button class="danger" onclick="resetGame()">Mulai keluarga baru</button></div><div class="muted" style="margin-top:8px">Game tersimpan di perangkat/browser ini.</div></div>
+</aside>
+</div>
+<div class="footer">JEJAK KELUARGA • Setiap generasi mewarisi cerita, bukan kepastian.</div>
+</main>
 <script>
-(()=>{
+const jobList=[
+["Belum bekerja","Tidak ada",0,0],["Petani","Dasar",45,1],["Pekerja toko","Dasar",55,1],["Kurir","Dasar",60,1],["Pelayan restoran","Dasar",65,1],["Petugas kebersihan","Dasar",62,1],["Penjaga keamanan","Dasar",75,1],["Montir","Menengah",100,2],["Koki","Menengah",110,2],["Perawat","Menengah",120,2],["Guru","Menengah",125,2],["Desainer","Menengah",145,2],["Programmer","Menengah",180,2],["Polisi","Menengah",150,2],["Pengusaha kecil","Menengah",170,2],["Akuntan","Lanjutan",190,3],["Dokter","Lanjutan",260,3],["Insinyur","Lanjutan",240,3],["Pengacara","Lanjutan",250,3],["Manajer","Lanjutan",280,3],["Arsitek","Lanjutan",270,3],["Ilmuwan","Lanjutan",300,3],["Direktur","Ahli",420,4],["Profesor","Ahli",390,4],["CEO","Ahli",600,4],["Pemilik perusahaan","Ahli",700,4],["Seniman terkenal","Ahli",360,4]
+];
+let game,selected=1,paused=false,speed=1,timer=null;
 const $=id=>document.getElementById(id);
-if(!window.THREE){$('message').style.display='block';$('message').textContent='Mesin 3D gagal dimuat. Periksa koneksi internet lalu muat ulang.';return}
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x84939b);scene.fog=new THREE.Fog(0x84939b,65,190);
-const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,320);
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.9;renderer.outputEncoding=THREE.sRGBEncoding;$('game').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xc2d0d5,0x344239,1.25));
-const sun=new THREE.DirectionalLight(0xffdfb0,1.7);sun.position.set(-35,55,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=90;sun.shadow.camera.bottom=-90;scene.add(sun);
-const mat=(c,r=.88)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
-function add(geo,m,x,y,z,cast=true){const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=true;scene.add(o);return o}
-function box(x,y,z,w,h,d,c){return add(new THREE.BoxGeometry(w,h,d),mat(c),x,y,z)}
-// city ground and grid road network
-const ground=add(new THREE.PlaneGeometry(260,260),mat(0x58675d),0,-.16,0,false);ground.rotation.x=-Math.PI/2;
-function road(x,z,w,d){box(x,-.045,z,w,.16,d,0x30383d);if(w>d){for(let xx=x-w/2+5;xx<x+w/2-3;xx+=10)box(xx,.045,z,.9,.025,.12,0xc9b98e)}else{for(let zz=z-d/2+5;zz<z+d/2-3;zz+=10)box(x,.045,zz,.12,.025,.9,0xc9b98e)}}
-road(0,0,18,240);road(0,-55,240,15);road(0,55,240,15);road(-55,0,15,240);road(55,0,15,240);road(0,0,240,13);
-for(let x=-110;x<=110;x+=22){if(Math.abs(x)>8)road(x,0,9,240)}
-for(let z=-110;z<=110;z+=22){if(Math.abs(z)>8)road(0,z,240,9)}
-// city blocks, plazas and buildings
-function building(x,z,w,d,h,color,accent){
-box(x,h/2,z,w,h,d,color);box(x,h+.22,z,w+.3,.44,d+.3,0x303b41);
-for(let yy=2.2;yy<h-1;yy+=2.5){for(let xx=-w/2+1.2;xx<w/2-0.5;xx+=2){box(x+xx,yy,z-d/2-.07,1.15,1.05,.1,accent||0x78949a)}}
-box(x,h*.43,z-d/2-.12,w*.48,.55,.12,0x29383d);
-}
-const palette=[0x777b7b,0x8a796c,0x687c7a,0x77768a,0x9a8b78,0x626f7b,0x887d70];
-let bi=0;
-for(let gx=-3;gx<=3;gx++)for(let gz=-3;gz<=3;gz++){
- if(gx===0&&gz===0)continue;
- const x=gx*30,z=gz*30;
- const h=8+((Math.abs(gx*13+gz*7)%5)*4)+(Math.abs(gx)+Math.abs(gz)>3?8:0);
- building(x,z,13,13,h,palette[bi++%palette.length],0x8ba3a6);
- if((gx+gz)%2===0)building(x+8,z+7,7,8,5+((gx*gz+20)%4)*2,0x82796d,0x9bb1ad);
-}
-// park near west side
-box(-31,.02,-30,25,.15,27,0x42634d);
-function tree(x,z,s=1){add(new THREE.CylinderGeometry(.16*s,.23*s,1.8*s,7),mat(0x58412f),x,.9*s,z);add(new THREE.SphereGeometry(1.05*s,9,8),mat(0x315b43),x,2*s,z);add(new THREE.SphereGeometry(.65*s,8,7),mat(0x456d4c),x+.35*s,2.25*s,z-.2*s)}
-for(let i=0;i<9;i++){tree(-41+i*2.5,-41);tree(-41+i*2.5,-19);tree(-43,-39+i*2.5);tree(-19,-39+i*2.5)}
-// plaza fountain
-add(new THREE.CylinderGeometry(3,3,.35,20),mat(0x8d9a9b),-31,.25,-30);
-add(new THREE.CylinderGeometry(1.1,1.3,1.3,16),mat(0x9daeb0),-31,.9,-30);
-add(new THREE.SphereGeometry(.45,12,10),new THREE.MeshStandardMaterial({color:0x83b8c1,metalness:.2,roughness:.25}),-31,1.8,-30);
-// street lamps and benches
-function lamp(x,z){box(x,1.8,z,.12,3.6,.12,0x303638);add(new THREE.SphereGeometry(.22,8,8),new THREE.MeshStandardMaterial({color:0xffd89b,emissive:0x65451f}),x,3.65,z)}
-for(let i=-5;i<=5;i++){lamp(i*18,-8);lamp(i*18,8);lamp(-8,i*18);lamp(8,i*18)}
-function bench(x,z){box(x,.55,z,2,.16,.65,0x805b3c);box(x,.88,z+.25,2,.65,.13,0x805b3c);box(x,.25,z-.2,.12,.5,.12,0x333a39);box(x+1.8,.25,z-.2,.12,.5,.12,0x333a39)}
-bench(-37,-29);bench(-25,-22);bench(-39,-22);
-// shop signs / recognizable places
-function sign(x,y,z,w,textColor){box(x,y,z,w,.65,.16,textColor)}
-sign(-12,3,-17,7,0xb28a54);sign(15,3,-17,7,0x537d79);sign(30,3,14,8,0x9c684b);
-// character models
-function person(shirt,pants,skin){const g=new THREE.Group();const torso=add(new THREE.CapsuleGeometry(.34,.68,4,8),mat(shirt),0,1.13,0);torso.parent?.remove(torso);g.add(torso);torso.position.set(0,1.13,0);const head=add(new THREE.SphereGeometry(.27,12,10),mat(skin),0,1.9,0);g.add(head);head.position.set(0,1.9,0);for(let x of [-.16,.16]){const leg=add(new THREE.BoxGeometry(.17,.68,.2),mat(pants),x,.38,0);g.add(leg);leg.position.set(x,.38,0)}scene.add(g);return g}
-const player=person(0x293f59,0x20272d,0xb98262);player.position.set(0,0,14);
-const nadia=person(0xb96d42,0x333d45,0xd4a17c);nadia.position.set(-31,0,-24);
-const npcs=[];for(let i=0;i<12;i++){const p=person([0x536f7d,0x687852,0x885c69,0x9a794e][i%4],0x303943,0xb98568);p.position.set((i%4)*15-25,0,Math.floor(i/4)*28-35);npcs.push(p)}
-// interaction markers
-const marker=add(new THREE.TorusGeometry(.65,.07,8,24),mat(0xf0c477),-31,.12,-24);marker.rotation.x=Math.PI/2;
-// mobile joystick + keyboard
-const joy=$('joystick'),stick=$('stick');let joyActive=false,joyX=0,joyY=0,keys={},sprint=false,energy=100,minutes=480,money=1000,jump=0;
-function joyMove(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=39,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}joyX=dx/max;joyY=dy/max;stick.style.transform=`translate(${dx}px,${dy}px)`}
-joy.addEventListener('pointerdown',e=>{e.preventDefault();joyActive=true;joy.setPointerCapture(e.pointerId);joyMove(e)});
-joy.addEventListener('pointermove',e=>{if(joyActive)joyMove(e)});
-function joyEnd(){joyActive=false;joyX=joyY=0;stick.style.transform='translate(0,0)'}
-['pointerup','pointercancel','lostpointercapture'].forEach(v=>joy.addEventListener(v,joyEnd));
-function bind(id,k){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;b.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>b.addEventListener(v,()=>keys[k]=false))}
-bind('up','up');bind('down','down');bind('left','left');bind('right','right');
-addEventListener('keydown',e=>keys[e.code]=true);addEventListener('keyup',e=>keys[e.code]=false);
-$('sprint').onclick=()=>{sprint=!sprint;$('sprint').textContent='🏃 LARI: '+(sprint?'ON':'OFF')};
-$('jump').onclick=()=>{if(jump===0)jump=1};
-function say(t){$('message').style.display='block';$('message').textContent=t}
-$('interact').onclick=()=>{if(player.position.distanceTo(nadia.position)<5){say('Nadia: Hai! Aku Nadia. Selamat datang di kota ini. Mau aku tunjukkan tempat menarik?');$('mission').innerHTML='<strong>MISI SELESAI</strong><br>Kamu sudah bertemu Nadia!'}else say('Belum ada orang di dekatmu. Nadia berada di taman kota, sebelah barat laut. Ikuti penanda emas di peta.')};
-const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);
-let dx=(keys.right||keys.ArrowRight||keys.KeyD?1:0)-(keys.left||keys.ArrowLeft||keys.KeyA?1:0)+joyX;
-let dz=(keys.down||keys.ArrowDown||keys.KeyS?1:0)-(keys.up||keys.ArrowUp||keys.KeyW?1:0)+joyY;
-const n=Math.hypot(dx,dz);if(n>.08){dx/=Math.max(1,n);dz/=Math.max(1,n);const fast=sprint&&energy>0;const speed=fast?9:5;player.position.x+=dx*speed*dt;player.position.z+=dz*speed*dt;player.rotation.y=Math.atan2(dx,dz);minutes+=dt*(fast?4:2);if(fast)energy=Math.max(0,energy-dt*8);else energy=Math.min(100,energy+dt*2)}
-if(jump>0){player.position.y=Math.sin(jump*Math.PI)*.9;jump+=dt*1.5;if(jump>=1){jump=0;player.position.y=0}}
-player.position.x=THREE.MathUtils.clamp(player.position.x,-112,112);player.position.z=THREE.MathUtils.clamp(player.position.z,-112,112);
-const dist=player.position.distanceTo(nadia.position);marker.rotation.z+=dt*1.2;marker.position.y=.15+Math.sin(performance.now()*.003)*.12;
-npcs.forEach((p,i)=>{p.position.x+=Math.sin(performance.now()*.00025+i*2)*dt*.35;p.position.z+=Math.cos(performance.now()*.0002+i)*dt*.25});
-camera.position.lerp(new THREE.Vector3(player.position.x,8,player.position.z+12),.09);camera.lookAt(player.position.x,1.1,player.position.z-1);
-const h=Math.floor(minutes/60)%24,m=Math.floor(minutes%60);$('clock').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');$('energy').textContent=Math.round(energy);
-$('location').textContent=player.position.distanceTo(new THREE.Vector3(-31,0,-30))<20?'📍 Taman Kota':player.position.distanceTo(new THREE.Vector3(0,0,0))<20?'📍 Pusat Kota':'📍 Distrik Perumahan';
-$('mapdot').style.left=(43+player.position.x/240*55)+'px';$('mapdot').style.top=(43+player.position.z/240*55)+'px';
-renderer.render(scene,camera)}
-animate();
-function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}
-addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,250));
-})();
+function person(name,gender,age,parents=[],gen=1){return {id:game.nextId++,name,gender,age,parents,children:[],gen,alive:true,job:0,money:Math.floor(150+Math.random()*250),health:85+Math.floor(Math.random()*15),happiness:65+Math.floor(Math.random()*25),skill:Math.floor(Math.random()*25),education:0,effort:0,relationship:65,partner:null,traits:["Mandiri","Ramah","Tekun","Kreatif","Ambisius"][Math.floor(Math.random()*5)],lastTalk:"",birthYear:game.year-age};}
+function init(){game={year:2026,month:1,nextId:1,familyName:"Pratama",people:[],log:[],dialogs:[],fund:500,events:0};let a=person("Arga Pratama","Laki-laki",28,[],1),b=person("Nadia Pratama","Perempuan",26,[],1);a.partner=b.id;b.partner=a.id;game.people=[a,b];let c=person("Raka Pratama","Laki-laki",4,[a.id,b.id],2);a.children.push(c.id);b.children.push(c.id);game.people.push(c);selected=a.id;note("Kisah keluarga Pratama dimulai. Arga dan Nadia membangun hidup bersama, sementara Raka tumbuh di rumah kecil mereka.");talk("Nadia","Kita mulai dari yang sederhana dulu, ya. Yang penting kita saling dukung.","Arga","Setuju. Aku akan cari pekerjaan yang lebih baik supaya masa depan Raka terjamin.");render();}
+function get(id){return game.people.find(p=>p.id===id)}
+function alive(){return game.people.filter(p=>p.alive)}
+function money(n){return "Rp"+Math.round(n).toLocaleString("id-ID")}
+function note(t){game.log.unshift({year:game.year,month:game.month,text:t});game.log=game.log.slice(0,60)}
+function talk(from,msg,to="Keluarga",reply=""){game.dialogs.unshift({year:game.year,from,msg,to,reply});game.dialogs=game.dialogs.slice(0,40)}
+function dateText(){return ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"][game.month-1]+" "+game.year}
+function render(){renderStats();renderTree();renderMembers();renderDetail();renderJobs();renderDialogs();renderLog();$("dateLabel").textContent=dateText()+" • Tahun ke-"+(game.year-2026+1);$("speedLabel").textContent=paused?"Waktu dijeda.":`Waktu berjalan pada kecepatan ${speed}×. Setiap bulan memproses pekerjaan, kebutuhan, relasi, dan peristiwa.`;$("pauseBtn").textContent=paused?"▶ Lanjut":"Ⅱ Jeda";}
+function renderStats(){let total=game.people.length,working=alive().filter(p=>p.age>=18&&p.job>0).length;let wealth=game.fund+alive().reduce((s,p)=>s+p.money,0);$("stats").innerHTML=[["Tahun",game.year],["Anggota keluarga",total],["Bekerja",working],["Aset keluarga",money(wealth)]].map(x=>`<div class="stat"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join("")}
+function renderTree(){let gens={};game.people.forEach(p=>(gens[p.gen]??=[]).push(p));$("tree").innerHTML=Object.keys(gens).sort((a,b)=>a-b).map(g=>`<div class="generation"><b>Generasi ${g}</b>${gens[g].map(p=>`<div class="person ${selected===p.id?"active":""}" onclick="selectPerson(${p.id})"><h3>${p.alive?"":"† "}${p.name}</h3><small>${p.age} tahun • ${p.job?jobList[p.job][0]:"Belum bekerja"}</small><div><span class="tag">${p.gender}</span><span class="tag">${p.children.length} anak</span></div></div>`).join("")}</div>`).join("")}
+function renderMembers(){$("members").innerHTML=alive().sort((a,b)=>a.gen-b.gen||a.age-b.age).map(p=>`<div class="person ${selected===p.id?"active":""}" onclick="selectPerson(${p.id})"><div class="row between"><h3>${p.name}</h3><span class="tag">${p.age} th</span></div><div class="muted">${p.job?jobList[p.job][0]:"Belum bekerja"} • ${p.traits}</div><div class="row"><span class="tag">💰 ${money(p.money)}</span><span class="tag">Anak ${p.children.length}</span></div></div>`).join("")}
+function selectPerson(id){selected=id;render()}
+function renderDetail(){let p=get(selected);if(!p){$("detail").textContent="Pilih anggota keluarga.";return}let parent=p.parents.map(get).filter(Boolean),partner=get(p.partner);$("detail").innerHTML=`<h3>${p.name} ${p.alive?"":"(telah meninggal)"}</h3><p class="muted">${p.age} tahun • Generasi ${p.gen} • ${p.traits}</p><div class="grid2"><div>❤️ Kesehatan <b>${p.health}</b><div class="bar"><i style="width:${p.health}%"></i></div></div><div>😊 Kebahagiaan <b>${p.happiness}</b><div class="bar"><i style="width:${p.happiness}%"></i></div></div><div>🧠 Keahlian <b>${p.skill}</b><div class="bar"><i style="width:${p.skill}%"></i></div></div><div>🤝 Hubungan <b>${p.relationship}</b><div class="bar"><i style="width:${p.relationship}%"></i></div></div></div><p>💰 Uang: <b>${money(p.money)}</b> • Pendidikan: ${["Tidak ada","SMA","Diploma","Sarjana","Pascasarjana"][p.education]}</p><p>💼 Pekerjaan: <b>${jobList[p.job][0]}</b> • Pengalaman usaha: ${p.effort}</p><p>Orang tua: ${parent.map(x=>x.name).join(", ")||"Tidak tercatat"}<br>Pasangan: ${partner?partner.name:"Belum ada"}<br>Anak: ${p.children.map(id=>get(id)?.name).filter(Boolean).join(", ")||"Belum ada"}</p><div class="row"><button class="good" onclick="study(${p.id})">Belajar / kursus</button><button onclick="workHard(${p.id})">Berusaha keras</button><button onclick="rest(${p.id})">Istirahat</button></div><div class="row" style="margin-top:8px"><button onclick="findPartner(${p.id})" ${p.age<18||p.partner?"disabled":""}>Cari pasangan</button><button onclick="haveChild(${p.id})" ${p.age<18||!p.partner?"disabled":""}>Rencanakan anak</button><button onclick="familyTalk(${p.id})">Ajak bicara</button></div>`}
+function renderJobs(){let p=get(selected);if(!p||!p.alive||p.age<16){$("jobs").innerHTML="<p class='muted'>Anggota terpilih belum cukup umur untuk bekerja. Usia kerja dimulai 16 tahun.</p>";return}$("jobs").innerHTML=jobList.slice(1).map((j,i)=>{let idx=i+1,req=j[3],can=p.education>=Math.max(0,req-1)&&p.skill>=req*10;return `<div class="job"><div class="row between"><strong>${j[0]}</strong><b>${money(j[2])}/bln</b></div><small>Jenjang ${j[1]} • Syarat: skill ${req*10}+ dan pendidikan ${Math.max(0,req-1)}+</small><div class="row" style="margin-top:6px"><button ${!can||p.job===idx?"disabled":""} onclick="applyJob(${p.id},${idx})">${p.job===idx?"Sedang bekerja":can?"Lamar pekerjaan":"Belum memenuhi syarat"}</button></div></div>`}).join("")}
+function renderDialogs(){$("dialogs").innerHTML=game.dialogs.slice(0,12).map(d=>`<div class="dialog"><small>${d.year} • ${d.from} kepada ${d.to}</small><div>“${d.msg}”</div>${d.reply?`<div class="muted"><b>Balasan:</b> “${d.reply}”</div>`:""}</div>`).join("")||"<p class='muted'>Percakapan keluarga akan muncul seiring waktu.</p>"}
+function renderLog(){$("log").innerHTML=game.log.slice(0,12).map(e=>`<div class="event"><small>${e.month}/${e.year}</small><div>${e.text}</div></div>`).join("")}
+function study(id){let p=get(id);if(p.age<6)return alert("Masih terlalu kecil untuk belajar mandiri.");if(p.money<50)return alert("Uang tidak cukup untuk biaya belajar.");p.money-=50;p.skill=Math.min(100,p.skill+8);p.education=Math.min(4,p.education+1);p.happiness=Math.max(0,p.happiness-2);note(`${p.name} mengikuti pendidikan atau kursus. Keahliannya meningkat.`);talk(p.name,"Aku ingin terus belajar. Kesempatan yang bagus harus dipersiapkan.");render()}
+function workHard(id){let p=get(id);if(p.age<16||!p.job)return alert("Dia perlu memiliki pekerjaan terlebih dahulu.");p.effort++;p.skill=Math.min(100,p.skill+3);p.happiness=Math.max(0,p.happiness-3);p.money+=Math.round(jobList[p.job][2]*.15);talk(p.name,"Aku akan berusaha lebih keras. Semoga kerja kerasku membuahkan hasil.");if(p.effort%4===0&&p.skill>=35){let old=p.job;p.money+=jobList[old][2];note(`${p.name} mendapat bonus karena kinerja konsisten.`)}render()}
+function rest(id){let p=get(id);p.health=Math.min(100,p.health+15);p.happiness=Math.min(100,p.happiness+10);talk(p.name,"Hari ini aku perlu istirahat. Besok aku mulai lagi dengan tenaga baru.");render()}
+function applyJob(id,j){let p=get(id);p.job=j;note(`${p.name} diterima bekerja sebagai ${jobList[j][0]}.`);talk(p.name,`Aku diterima sebagai ${jobList[j][0]}! Ini langkah baru untuk masa depanku.`);render()}
+function findPartner(id){let p=get(id);if(p.age<18||p.partner)return;let candidates=alive().filter(x=>x.id!==id&&x.age>=18&&!x.partner&&x.gender!==p.gender);let q=candidates[0];if(!q){let qname=p.gender==="Laki-laki"?"Maya":"Dimas";q=person(qname+" "+game.familyName,p.gender==="Laki-laki"?"Perempuan":"Laki-laki",Math.max(18,p.age+Math.floor(Math.random()*7)-3),[],p.gen);game.people.push(q)}p.partner=q.id;q.partner=p.id;p.relationship=Math.min(100,p.relationship+15);q.relationship=Math.min(100,q.relationship+15);note(`${p.name} menjalin hubungan dengan ${q.name}.`);talk(p.name,`Aku merasa cocok denganmu, ${q.name}. Maukah kita membangun masa depan bersama?`,q.name,"Aku juga ingin mencoba membangun keluarga bersamamu.");render()}
+function haveChild(id){let p=get(id),q=get(p.partner);if(!q||p.age<18||q.age<18)return;if(p.money+q.money<100)return alert("Kalian perlu menyiapkan setidaknya Rp100 untuk kebutuhan awal anak.");let names=p.gender==="Laki-laki"?["Alya","Rafi","Naya","Faris","Aisha","Daffa"]:["Rafi","Alya","Naya","Faris","Aisha","Daffa"];let name=names[Math.floor(Math.random()*names.length)]+" "+game.familyName;let c=person(name,Math.random()<.5?"Laki-laki":"Perempuan",0,[p.id,q.id],Math.max(p.gen,q.gen)+1);p.children.push(c.id);q.children.push(c.id);p.money-=50;q.money-=50;game.people.push(c);note(`${p.name} dan ${q.name} menyambut kelahiran ${c.name}.`);talk(p.name,"Selamat datang di keluarga kita. Kami akan berusaha memberikan kehidupan yang baik untukmu.",q.name,"Aku bahagia sekali. Semoga dia tumbuh sehat dan punya banyak pilihan dalam hidup.");selected=c.id;render()}
+function familyTalk(id){let p=get(id),rel=get(p.partner)||game.people.find(x=>x.id!==id&&x.alive&&x.gen===p.gen);let lines=["Bagaimana harimu? Ceritakan semuanya kepadaku.","Aku ingin kita lebih sering menghabiskan waktu bersama.","Aku bangga melihat usaha yang kamu lakukan.","Apa impian terbesarmu untuk keluarga ini?","Jangan lupa menjaga kesehatan. Pekerjaan bisa menunggu.","Kita mungkin belum punya banyak, tetapi kita bisa terus berkembang."];let replies=["Terima kasih sudah peduli. Aku merasa didengar.","Aku akan mencoba melakukan yang terbaik.","Ayo kita rencanakan masa depan bersama.","Aku senang kamu mengajakku bicara."];p.happiness=Math.min(100,p.happiness+5);p.relationship=Math.min(100,p.relationship+5);if(rel){rel.happiness=Math.min(100,rel.happiness+4);rel.relationship=Math.min(100,rel.relationship+4)}talk(p.name,lines[Math.floor(Math.random()*lines.length)],rel?.name||"Keluarga",replies[Math.floor(Math.random()*replies.length)]);render()}
+function monthTick(){game.month++;if(game.month>12){game.month=1;game.year++}for(let p of alive()){if(p.age>=16&&p.job>0){let pay=jobList[p.job][2];p.money+=pay;p.happiness=Math.max(0,p.happiness-1);p.health=Math.max(0,p.health-(p.effort>5?2:1));p.effort=Math.max(0,p.effort-1)}else if(p.age<16){p.happiness=Math.min(100,p.happiness+(Math.random()<.5?1:0));p.skill=Math.min(100,p.skill+(p.age>5?1:0))}if(Math.random()<.12)p.happiness=Math.max(0,Math.min(100,p.happiness+(Math.random()-.45)*12));if(p.age>0&&game.month===((p.birthYear%12)+1)){p.age++;if(p.age===16)note(`${p.name} kini berusia 16 tahun dan dapat mulai mencari pekerjaan.`);if(p.age===18)note(`${p.name} telah dewasa dan bisa membangun keluarga sendiri.`)}if(p.health<=0){p.alive=false;note(`${p.name} meninggal dunia setelah kesehatannya menurun.`);talk("Keluarga",`Kami akan selalu mengenang ${p.name}.`)}}
+ if(Math.random()<.13){let adults=alive().filter(p=>p.age>=18);if(adults.length){let p=adults[Math.floor(Math.random()*adults.length)];let e=["mendapat pujian dari rekan kerja","menghadapi tantangan di tempat kerja","mengikuti kegiatan bersama keluarga","bertemu teman lama","mendapat ide baru untuk masa depan"][Math.floor(Math.random()*5)];note(`${p.name} ${e}.`);if(Math.random()<.5)talk(p.name,["Hari ini cukup melelahkan, tetapi aku belajar banyak.","Aku punya ide baru. Mungkin ini bisa mengubah masa depan kita.","Senang rasanya bisa pulang dan bertemu keluarga."][Math.floor(Math.random()*3)]);}}
+ if(Math.random()<.04){let adults=alive().filter(p=>p.age>=20&&p.age<48&&p.partner);if(adults.length){let p=adults[Math.floor(Math.random()*adults.length)];if(Math.random()<.3)haveChildSilent(p)}}
+ render()}
+function haveChildSilent(p){let q=get(p.partner);if(!q||p.children.length>=5||p.money+q.money<200)return;let c=person(["Dina","Rizky","Putri","Bima","Zahra","Ilham"][Math.floor(Math.random()*6)]+" "+game.familyName,Math.random()<.5?"Laki-laki":"Perempuan",0,[p.id,q.id],Math.max(p.gen,q.gen)+1);p.children.push(c.id);q.children.push(c.id);p.money-=50;q.money-=50;game.people.push(c);note(`${p.name} dan ${q.name} dikaruniai anak, ${c.name}.`);talk(p.name,"Keluarga kita bertambah. Aku ingin memberi semua anak kesempatan yang sama.",q.name,"Kita akan membesarkan mereka dengan penuh perhatian.");}
+function advance(n){for(let i=0;i<n;i++)monthTick()}
+function togglePause(){paused=!paused;render()}
+function setSpeed(n){speed=n;paused=false;render();startTimer()}
+function startTimer(){if(timer)clearInterval(timer);timer=setInterval(()=>{if(!paused)advance(speed)},2500)}
+function saveGame(){localStorage.setItem("jejakKeluargaSave",JSON.stringify({game,selected}));alert("Keluarga berhasil disimpan di perangkat ini.")}
+function loadGame(){let s=localStorage.getItem("jejakKeluargaSave");if(!s)return alert("Belum ada simpanan.");let d=JSON.parse(s);game=d.game;selected=d.selected;render();alert("Simpanan berhasil dimuat.")}
+function resetGame(){if(confirm("Mulai keluarga baru? Simpanan lama di perangkat akan ditimpa jika kamu menyimpan lagi.")){init()}}
+init();startTimer();
 </script>
-</body>
-</html>
+</body></html>
