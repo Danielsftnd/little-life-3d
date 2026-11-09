@@ -1,291 +1,147 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Little Life 3D V2</title>
+<title>Little Life 3D — Massive City Update</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;overflow:hidden;background:#18232b;font-family:Arial;color:white}
-canvas{display:block}
+:root{--glass:rgba(12,22,31,.82);--line:rgba(255,255,255,.16);--gold:#e7bd78}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#1b2931;color:#fff;font-family:system-ui,Arial;touch-action:none}
+#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
 #hud{position:fixed;inset:0;pointer-events:none}
-.panel{background:#14232ddd;border:1px solid #ffffff30;border-radius:12px;padding:10px}
-#brand{position:absolute;top:12px;left:12px;font-size:14px}
-#stats{position:absolute;right:12px;top:12px;text-align:right;font-size:12px}
-#quest{position:absolute;top:75px;left:12px;font-size:12px}
-#controls{position:absolute;bottom:15px;left:15px;display:grid;grid-template-columns:55px 55px 55px;gap:5px;pointer-events:auto}
-button{background:#183640eF;color:white;border:1px solid #ffffff40;border-radius:12px;padding:14px;font-size:18px;touch-action:none}
-#up{grid-column:2}
-#left{grid-column:1}
-#down{grid-column:2}
-#right{grid-column:3}
-#actions{position:absolute;right:15px;bottom:20px;pointer-events:auto}
-#actions button{font-size:14px;background:#b98b4e}
-#dialog{position:absolute;right:15px;bottom:80px;width:210px;font-size:12px;display:none}
-#rotate{display:none;position:fixed;inset:0;background:#18232b;z-index:5;align-items:center;justify-content:center;text-align:center}
+.panel{background:var(--glass);border:1px solid var(--line);border-radius:13px;box-shadow:0 8px 24px #0005;backdrop-filter:blur(9px)}
+#logo{position:absolute;top:10px;left:10px;padding:9px 12px;font-size:10px;letter-spacing:1px}
+#logo b{display:block;font-size:15px;letter-spacing:1.5px}
+#stats{position:absolute;right:10px;top:10px;padding:8px 11px;text-align:right;font-size:11px;line-height:1.55}
+#stats b{font-size:15px;color:var(--gold)}
+#mission{position:absolute;left:10px;top:75px;padding:9px 11px;max-width:210px;font-size:11px;line-height:1.4}
+#mission strong{color:var(--gold);letter-spacing:.7px}
+#location{position:absolute;left:10px;top:143px;padding:6px 9px;font-size:10px;color:#dce7e9}
+#joystick{position:absolute;left:22px;bottom:20px;width:122px;height:122px;border-radius:50%;background:#0c172b88;border:2px solid #ffffff55;pointer-events:auto;touch-action:none;box-shadow:0 5px 20px #0005}
+#stick{position:absolute;left:35px;top:35px;width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#e6c18a,#9d7044);border:2px solid #fff9;box-shadow:0 4px 12px #0008;pointer-events:none}
+#actions{position:absolute;right:12px;bottom:17px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:auto}
+.action{min-width:94px;padding:11px 13px;border-radius:12px;border:1px solid #ffffff35;background:#172c39eF;color:white;font-weight:700;font-size:12px;box-shadow:0 4px 14px #0005}
+#interact{background:linear-gradient(135deg,#d6aa68,#9c7043);color:#17232b;border:0}
+#message{position:absolute;right:12px;bottom:170px;width:min(250px,58vw);padding:11px 13px;font-size:12px;line-height:1.45;display:none}
+#map{position:absolute;right:12px;top:105px;width:94px;height:94px;border-radius:50%;border:2px solid #ffffff99;background:#17252dcc;overflow:hidden;box-shadow:0 5px 16px #0006}
+#map:before,#map:after{content:"";position:absolute;background:#b7aa87;opacity:.8}
+#map:before{width:100%;height:5px;top:45px;transform:rotate(-20deg)}
+#map:after{height:100%;width:5px;left:45px;transform:rotate(24deg)}
+#mapdot{position:absolute;width:8px;height:8px;background:#ffcf70;border:1px solid white;border-radius:50%;left:43px;top:43px;z-index:2}
+#toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:12px 18px;display:none;font-size:13px;text-align:center}
+#rotate{display:none;position:fixed;inset:0;z-index:10;background:#14232c;align-items:center;justify-content:center;text-align:center;padding:28px}
 @media(orientation:portrait){#rotate{display:flex}}
+@media(orientation:landscape){#joystick{width:112px;height:112px}#stick{left:31px;top:31px}#map{width:82px;height:82px}#mapdot{left:37px;top:37px}#mission{top:72px}}
 </style>
 </head>
 <body>
-<div id="rotate">📱<br>Putar HP ke posisi horizontal</div>
+<div id="game"></div>
+<div id="rotate"><div><div style="font-size:42px">📱 ↻</div><b>Putar HP ke posisi horizontal</b><p>Little Life 3D dimainkan dalam mode landscape.</p></div></div>
 <div id="hud">
-<div id="brand" class="panel"><b>LITTLE LIFE 3D</b><br>City Life Simulator</div>
-<div id="stats" class="panel">HARI 1 · SENIN<br><b id="clock">08:00</b><br>💰 Rp 1.000</div>
-<div id="quest" class="panel">🎯 Temui Nadia di taman kota</div>
-<div id="controls">
-<button id="up">▲</button>
-<button id="left">◀</button>
-<button id="down">▼</button>
-<button id="right">▶</button>
+ <div id="logo" class="panel"><b>LITTLE LIFE</b> MASSIVE CITY UPDATE</div>
+ <div id="stats" class="panel">HARI 1 · SENIN<br><b id="clock">08:00</b> ☀️<br>💰 Rp <span id="money">1.000</span><br>⚡ <span id="energy">100</span>%</div>
+ <div id="mission" class="panel"><strong>MISI AKTIF</strong><br>Jelajahi kota dan temui Nadia di taman.</div>
+ <div id="location" class="panel">📍 Pusat Kota</div>
+ <div id="map"><div id="mapdot"></div></div>
+ <div id="joystick"><div id="stick"></div></div>
+ <div id="actions">
+  <button class="action" id="interact">💬 INTERAKSI</button>
+  <button class="action" id="sprint">🏃 LARI: OFF</button>
+  <button class="action" id="jump">⬆ LOMPAT</button>
+ </div>
+ <div id="message" class="panel"></div>
+ <div id="toast" class="panel"></div>
 </div>
-<div id="actions"><button id="talk">💬 BICARA</button><button id="run">🏃 LARI</button></div>
-<div id="dialog" class="panel"></div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 <script>
 (()=>{
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x899ba6);
-scene.fog=new THREE.Fog(0x899ba6,40,110);
-
-const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,200);
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-renderer.shadowMap.enabled=true;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=.82;
-document.body.appendChild(renderer.domElement);
-
-scene.add(new THREE.HemisphereLight(0xb9c9d5,0x39463e,1.2));
-const sun=new THREE.DirectionalLight(0xffe3b4,1.7);
-sun.position.set(-24,38,18);
-sun.castShadow=true;
-scene.add(sun);
-
-function mat(c){return new THREE.MeshStandardMaterial({color:c,roughness:.9})}
-function box(x,y,z,w,h,d,c){
-const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(c));
-o.position.set(x,y,z);
-o.castShadow=true;
-o.receiveShadow=true;
-scene.add(o);
-return o;
+const $=id=>document.getElementById(id);
+if(!window.THREE){$('message').style.display='block';$('message').textContent='Mesin 3D gagal dimuat. Periksa koneksi internet lalu muat ulang.';return}
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x84939b);scene.fog=new THREE.Fog(0x84939b,65,190);
+const camera=new THREE.PerspectiveCamera(58,innerWidth/innerHeight,.1,320);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.9;renderer.outputEncoding=THREE.sRGBEncoding;$('game').appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xc2d0d5,0x344239,1.25));
+const sun=new THREE.DirectionalLight(0xffdfb0,1.7);sun.position.set(-35,55,25);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-90;sun.shadow.camera.right=90;sun.shadow.camera.top=90;sun.shadow.camera.bottom=-90;scene.add(sun);
+const mat=(c,r=.88)=>new THREE.MeshStandardMaterial({color:c,roughness:r});
+function add(geo,m,x,y,z,cast=true){const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=true;scene.add(o);return o}
+function box(x,y,z,w,h,d,c){return add(new THREE.BoxGeometry(w,h,d),mat(c),x,y,z)}
+// city ground and grid road network
+const ground=add(new THREE.PlaneGeometry(260,260),mat(0x58675d),0,-.16,0,false);ground.rotation.x=-Math.PI/2;
+function road(x,z,w,d){box(x,-.045,z,w,.16,d,0x30383d);if(w>d){for(let xx=x-w/2+5;xx<x+w/2-3;xx+=10)box(xx,.045,z,.9,.025,.12,0xc9b98e)}else{for(let zz=z-d/2+5;zz<z+d/2-3;zz+=10)box(x,.045,zz,.12,.025,.9,0xc9b98e)}}
+road(0,0,18,240);road(0,-55,240,15);road(0,55,240,15);road(-55,0,15,240);road(55,0,15,240);road(0,0,240,13);
+for(let x=-110;x<=110;x+=22){if(Math.abs(x)>8)road(x,0,9,240)}
+for(let z=-110;z<=110;z+=22){if(Math.abs(z)>8)road(0,z,240,9)}
+// city blocks, plazas and buildings
+function building(x,z,w,d,h,color,accent){
+box(x,h/2,z,w,h,d,color);box(x,h+.22,z,w+.3,.44,d+.3,0x303b41);
+for(let yy=2.2;yy<h-1;yy+=2.5){for(let xx=-w/2+1.2;xx<w/2-0.5;xx+=2){box(x+xx,yy,z-d/2-.07,1.15,1.05,.1,accent||0x78949a)}}
+box(x,h*.43,z-d/2-.12,w*.48,.55,.12,0x29383d);
 }
-
-const ground=new THREE.Mesh(
-new THREE.PlaneGeometry(180,180),mat(0x596b60));
-ground.rotation.x=-Math.PI/2;
-ground.position.y=-.1;
-scene.add(ground);
-
-// Jalan raya
-box(0,-.02,0,13,.15,115,0x30383d);
-box(-7,-.01,0,2,.15,115,0x77766c);
-box(7,-.01,0,2,.15,115,0x77766c);
-for(let z=-52;z<60;z+=8)
-box(0,.07,z,.16,.03,3.2,0xd8c99c);
-
-// Taman
-box(-20,.02,-7,25,.18,34,0x777d69);
-box(-20,.13,-7,15,.12,22,0x526e58);
-
-function tree(x,z){
-const trunk=new THREE.Mesh(
-new THREE.CylinderGeometry(.18,.25,1.8,7),mat(0x594331));
-trunk.position.set(x,.9,z);
-scene.add(trunk);
-const leaves=new THREE.Mesh(
-new THREE.SphereGeometry(1.15,9,7),mat(0x315d48));
-leaves.position.set(x,2.3,z);
-scene.add(leaves);
+const palette=[0x777b7b,0x8a796c,0x687c7a,0x77768a,0x9a8b78,0x626f7b,0x887d70];
+let bi=0;
+for(let gx=-3;gx<=3;gx++)for(let gz=-3;gz<=3;gz++){
+ if(gx===0&&gz===0)continue;
+ const x=gx*30,z=gz*30;
+ const h=8+((Math.abs(gx*13+gz*7)%5)*4)+(Math.abs(gx)+Math.abs(gz)>3?8:0);
+ building(x,z,13,13,h,palette[bi++%palette.length],0x8ba3a6);
+ if((gx+gz)%2===0)building(x+8,z+7,7,8,5+((gx*gz+20)%4)*2,0x82796d,0x9bb1ad);
 }
-
-for(let i=0;i<7;i++){
-tree(-29+i*3.5,-22);
-tree(-29+i*3.5,8);
-tree(-31,-17+i*4);
-tree(-9,-17+i*4);
-}
-
-// Gedung kota
-function building(x,z,w,d,h,color){
-box(x,h/2,z,w,h,d,color);
-box(x,h+.18,z,w+.25,.35,d+.25,0x343c43);
-for(let y=2;y<h-1;y+=2.3){
-for(let xx=-w/2+1;xx<w/2-.3;xx+=1.8){
-box(x+xx,y,z-d/2-.065,1.05,.95,.08,0x8ba7ad);
-}
-}
-box(x,h*.42,z-d/2-.09,w*.58,.5,.1,0x273b43);
-}
-
-building(-16,-28,12,10,11,0x777c80);
-building(0,-37,10,9,17,0x626e78);
-building(17,-26,12,11,13,0x8a8175);
-building(-16,24,13,11,8,0x8c7668);
-building(15,23,12,10,10,0x667d79);
-
-// Toko
-box(-16,1.7,-22,8,3.4,.5,0x35444a);
-box(-16,3.1,-22.3,7,.7,.18,0xc49a61);
-box(16,1.5,-18,7,3,.5,0x3a4a50);
-box(16,2.8,-18.3,6,.6,.18,0x7d9c91);
-
-// Lampu jalan
-function lamp(x,z){
-box(x,1.8,z,.12,3.6,.12,0x30383a);
-const light=new THREE.Mesh(
-new THREE.SphereGeometry(.25,8,8),
-new THREE.MeshStandardMaterial({
-color:0xffd89b,emissive:0x8d6733
-}));
-light.position.set(x,3.65,z);
-scene.add(light);
-}
-for(let z=-28;z<34;z+=12){
-lamp(-8,z);
-lamp(8,z+4);
-}
-
-// Bangku
-function bench(x,z){
-box(x,.55,z,2,.15,.65,0x815b3c);
-box(x,.85,z+.25,2,.65,.12,0x815b3c);
-box(x,.25,z-.2,.12,.5,.12,0x353b3a);
-box(x+.85,.25,z-.2,.12,.5,.12,0x353b3a);
-}
-bench(-21,-4);
-bench(-18,1);
-bench(-24,2);
-
-// Karakter
-function person(shirt,pants,skin){
-const g=new THREE.Group();
-const torso=new THREE.Mesh(
-new THREE.CapsuleGeometry(.34,.68,4,8),mat(shirt));
-torso.position.y=1.15;
-g.add(torso);
-const head=new THREE.Mesh(
-new THREE.SphereGeometry(.27,12,10),mat(skin));
-head.position.y=1.92;
-g.add(head);
-for(let x of [-.16,.16]){
-const leg=new THREE.Mesh(
-new THREE.BoxGeometry(.17,.68,.2),mat(pants));
-leg.position.set(x,.38,0);
-g.add(leg);
-}
-scene.add(g);
-return g;
-}
-
-const player=person(0x293f59,0x20272d,0xb98262);
-player.position.set(0,0,8);
-
-const nadia=person(0xb96d42,0x333d45,0xd4a17c);
-nadia.position.set(-19,0,-5);
-
-const walkers=[
-person(0x526d7c,0x353d45,0x9a7056),
-person(0x6b7654,0x333b46,0xd0a17f),
-person(0x8b5d69,0x303a42,0xb78365)
-];
-walkers[0].position.set(4,0,-19);
-walkers[1].position.set(-4,0,25);
-walkers[2].position.set(19,0,4);
-
-// Kontrol
-const keys={};
-let running=false;
-function bind(id,key){
-const b=document.getElementById(id);
-b.addEventListener('pointerdown',e=>{
-e.preventDefault();
-keys[key]=true;
-b.setPointerCapture(e.pointerId);
-});
-['pointerup','pointercancel','lostpointercapture'].forEach(v=>
-b.addEventListener(v,()=>keys[key]=false));
-}
-bind('up','up');
-bind('down','down');
-bind('left','left');
-bind('right','right');
-
-document.getElementById('run').onclick=()=>{
-running=!running;
-document.getElementById('run').textContent=
-running?'🏃 LARI ON':'🏃 LARI';
-};
-
-document.getElementById('talk').onclick=()=>{
-const dialog=document.getElementById('dialog');
-dialog.style.display='block';
-dialog.textContent=
-player.position.distanceTo(nadia.position)<4
-?'Nadia: Hai! Aku Nadia. Selamat datang di kota ini!'
-:'Dekati Nadia yang berbaju cokelat di taman untuk berbicara.';
-};
-
-addEventListener('keydown',e=>keys[e.code]=true);
-addEventListener('keyup',e=>keys[e.code]=false);
-
-let minutes=480;
+// park near west side
+box(-31,.02,-30,25,.15,27,0x42634d);
+function tree(x,z,s=1){add(new THREE.CylinderGeometry(.16*s,.23*s,1.8*s,7),mat(0x58412f),x,.9*s,z);add(new THREE.SphereGeometry(1.05*s,9,8),mat(0x315b43),x,2*s,z);add(new THREE.SphereGeometry(.65*s,8,7),mat(0x456d4c),x+.35*s,2.25*s,z-.2*s)}
+for(let i=0;i<9;i++){tree(-41+i*2.5,-41);tree(-41+i*2.5,-19);tree(-43,-39+i*2.5);tree(-19,-39+i*2.5)}
+// plaza fountain
+add(new THREE.CylinderGeometry(3,3,.35,20),mat(0x8d9a9b),-31,.25,-30);
+add(new THREE.CylinderGeometry(1.1,1.3,1.3,16),mat(0x9daeb0),-31,.9,-30);
+add(new THREE.SphereGeometry(.45,12,10),new THREE.MeshStandardMaterial({color:0x83b8c1,metalness:.2,roughness:.25}),-31,1.8,-30);
+// street lamps and benches
+function lamp(x,z){box(x,1.8,z,.12,3.6,.12,0x303638);add(new THREE.SphereGeometry(.22,8,8),new THREE.MeshStandardMaterial({color:0xffd89b,emissive:0x65451f}),x,3.65,z)}
+for(let i=-5;i<=5;i++){lamp(i*18,-8);lamp(i*18,8);lamp(-8,i*18);lamp(8,i*18)}
+function bench(x,z){box(x,.55,z,2,.16,.65,0x805b3c);box(x,.88,z+.25,2,.65,.13,0x805b3c);box(x,.25,z-.2,.12,.5,.12,0x333a39);box(x+1.8,.25,z-.2,.12,.5,.12,0x333a39)}
+bench(-37,-29);bench(-25,-22);bench(-39,-22);
+// shop signs / recognizable places
+function sign(x,y,z,w,textColor){box(x,y,z,w,.65,.16,textColor)}
+sign(-12,3,-17,7,0xb28a54);sign(15,3,-17,7,0x537d79);sign(30,3,14,8,0x9c684b);
+// character models
+function person(shirt,pants,skin){const g=new THREE.Group();const torso=add(new THREE.CapsuleGeometry(.34,.68,4,8),mat(shirt),0,1.13,0);torso.parent?.remove(torso);g.add(torso);torso.position.set(0,1.13,0);const head=add(new THREE.SphereGeometry(.27,12,10),mat(skin),0,1.9,0);g.add(head);head.position.set(0,1.9,0);for(let x of [-.16,.16]){const leg=add(new THREE.BoxGeometry(.17,.68,.2),mat(pants),x,.38,0);g.add(leg);leg.position.set(x,.38,0)}scene.add(g);return g}
+const player=person(0x293f59,0x20272d,0xb98262);player.position.set(0,0,14);
+const nadia=person(0xb96d42,0x333d45,0xd4a17c);nadia.position.set(-31,0,-24);
+const npcs=[];for(let i=0;i<12;i++){const p=person([0x536f7d,0x687852,0x885c69,0x9a794e][i%4],0x303943,0xb98568);p.position.set((i%4)*15-25,0,Math.floor(i/4)*28-35);npcs.push(p)}
+// interaction markers
+const marker=add(new THREE.TorusGeometry(.65,.07,8,24),mat(0xf0c477),-31,.12,-24);marker.rotation.x=Math.PI/2;
+// mobile joystick + keyboard
+const joy=$('joystick'),stick=$('stick');let joyActive=false,joyX=0,joyY=0,keys={},sprint=false,energy=100,minutes=480,money=1000,jump=0;
+function joyMove(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=39,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}joyX=dx/max;joyY=dy/max;stick.style.transform=`translate(${dx}px,${dy}px)`}
+joy.addEventListener('pointerdown',e=>{e.preventDefault();joyActive=true;joy.setPointerCapture(e.pointerId);joyMove(e)});
+joy.addEventListener('pointermove',e=>{if(joyActive)joyMove(e)});
+function joyEnd(){joyActive=false;joyX=joyY=0;stick.style.transform='translate(0,0)'}
+['pointerup','pointercancel','lostpointercapture'].forEach(v=>joy.addEventListener(v,joyEnd));
+function bind(id,k){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;b.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>b.addEventListener(v,()=>keys[k]=false))}
+bind('up','up');bind('down','down');bind('left','left');bind('right','right');
+addEventListener('keydown',e=>keys[e.code]=true);addEventListener('keyup',e=>keys[e.code]=false);
+$('sprint').onclick=()=>{sprint=!sprint;$('sprint').textContent='🏃 LARI: '+(sprint?'ON':'OFF')};
+$('jump').onclick=()=>{if(jump===0)jump=1};
+function say(t){$('message').style.display='block';$('message').textContent=t}
+$('interact').onclick=()=>{if(player.position.distanceTo(nadia.position)<5){say('Nadia: Hai! Aku Nadia. Selamat datang di kota ini. Mau aku tunjukkan tempat menarik?');$('mission').innerHTML='<strong>MISI SELESAI</strong><br>Kamu sudah bertemu Nadia!'}else say('Belum ada orang di dekatmu. Nadia berada di taman kota, sebelah barat laut. Ikuti penanda emas di peta.')};
 const clock=new THREE.Clock();
-
-function animate(){
-requestAnimationFrame(animate);
-const dt=Math.min(clock.getDelta(),.05);
-let dx=0,dz=0;
-
-if(keys.up||keys.ArrowUp||keys.KeyW)dz--;
-if(keys.down||keys.ArrowDown||keys.KeyS)dz++;
-if(keys.left||keys.ArrowLeft||keys.KeyA)dx--;
-if(keys.right||keys.ArrowRight||keys.KeyD)dx++;
-
-const n=Math.hypot(dx,dz);
-if(n){
-dx/=n;dz/=n;
-const speed=running?8:4.5;
-player.position.x+=dx*speed*dt;
-player.position.z+=dz*speed*dt;
-player.rotation.y=Math.atan2(dx,dz);
-minutes+=dt*(running?4:2);
-}
-
-player.position.x=THREE.MathUtils.clamp(player.position.x,-34,34);
-player.position.z=THREE.MathUtils.clamp(player.position.z,-48,48);
-
-walkers.forEach((w,i)=>{
-w.position.x+=Math.sin(performance.now()*.00025+i)*dt*.35;
-w.position.z+=Math.cos(performance.now()*.0002+i)*dt*.25;
-});
-
-camera.position.lerp(
-new THREE.Vector3(player.position.x,7.5,player.position.z+11),.075);
-camera.lookAt(player.position.x,1.1,player.position.z-1);
-
-const h=Math.floor(minutes/60)%24;
-const m=Math.floor(minutes%60);
-document.getElementById('clock').textContent=
-String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
-
-renderer.render(scene,camera);
-}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04);
+let dx=(keys.right||keys.ArrowRight||keys.KeyD?1:0)-(keys.left||keys.ArrowLeft||keys.KeyA?1:0)+joyX;
+let dz=(keys.down||keys.ArrowDown||keys.KeyS?1:0)-(keys.up||keys.ArrowUp||keys.KeyW?1:0)+joyY;
+const n=Math.hypot(dx,dz);if(n>.08){dx/=Math.max(1,n);dz/=Math.max(1,n);const fast=sprint&&energy>0;const speed=fast?9:5;player.position.x+=dx*speed*dt;player.position.z+=dz*speed*dt;player.rotation.y=Math.atan2(dx,dz);minutes+=dt*(fast?4:2);if(fast)energy=Math.max(0,energy-dt*8);else energy=Math.min(100,energy+dt*2)}
+if(jump>0){player.position.y=Math.sin(jump*Math.PI)*.9;jump+=dt*1.5;if(jump>=1){jump=0;player.position.y=0}}
+player.position.x=THREE.MathUtils.clamp(player.position.x,-112,112);player.position.z=THREE.MathUtils.clamp(player.position.z,-112,112);
+const dist=player.position.distanceTo(nadia.position);marker.rotation.z+=dt*1.2;marker.position.y=.15+Math.sin(performance.now()*.003)*.12;
+npcs.forEach((p,i)=>{p.position.x+=Math.sin(performance.now()*.00025+i*2)*dt*.35;p.position.z+=Math.cos(performance.now()*.0002+i)*dt*.25});
+camera.position.lerp(new THREE.Vector3(player.position.x,8,player.position.z+12),.09);camera.lookAt(player.position.x,1.1,player.position.z-1);
+const h=Math.floor(minutes/60)%24,m=Math.floor(minutes%60);$('clock').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');$('energy').textContent=Math.round(energy);
+$('location').textContent=player.position.distanceTo(new THREE.Vector3(-31,0,-30))<20?'📍 Taman Kota':player.position.distanceTo(new THREE.Vector3(0,0,0))<20?'📍 Pusat Kota':'📍 Distrik Perumahan';
+$('mapdot').style.left=(43+player.position.x/240*55)+'px';$('mapdot').style.top=(43+player.position.z/240*55)+'px';
+renderer.render(scene,camera)}
 animate();
-
-function resize(){
-camera.aspect=innerWidth/innerHeight;
-camera.updateProjectionMatrix();
-renderer.setSize(innerWidth,innerHeight);
-}
-addEventListener('resize',resize);
-addEventListener('orientationchange',()=>setTimeout(resize,250));
+function resize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}
+addEventListener('resize',resize);addEventListener('orientationchange',()=>setTimeout(resize,250));
 })();
 </script>
 </body>
-  </html>
-  
+</html>
